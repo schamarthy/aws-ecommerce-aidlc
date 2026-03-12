@@ -1,0 +1,106 @@
+services:
+
+  admin-api:
+    build: ./admin-api
+    restart: unless-stopped
+    environment:
+      ADMIN_DATABASE_URL: sqlite:////data/admin.db
+      ADMIN_S3_BUCKET_NAME: ${S3_BUCKET_NAME}
+      ADMIN_S3_IMAGES_CLOUDFRONT_URL: ${S3_IMAGES_CLOUDFRONT_URL}
+      ADMIN_CORS_ORIGINS: '["https://d3bwott4660u8l.cloudfront.net","https://dtjlzqdyq53fa.cloudfront.net","http://localhost:5174"]'
+    volumes:
+      - data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  catalog-api:
+    build: ./catalog-api
+    restart: unless-stopped
+    environment:
+      CATALOG_DATABASE_URL: sqlite:////data/admin.db
+      CATALOG_CORS_ORIGINS: '["https://d3bwott4660u8l.cloudfront.net","https://dtjlzqdyq53fa.cloudfront.net","http://localhost:5174"]'
+    volumes:
+      - data:/data
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  cart-api:
+    build: ./cart-api
+    restart: unless-stopped
+    environment:
+      CART_CART_DATABASE_URL: sqlite:////data/cart.db
+      CART_CATALOG_DATABASE_URL: sqlite:////data/admin.db
+      CART_CORS_ORIGINS: '["https://d3bwott4660u8l.cloudfront.net","https://dtjlzqdyq53fa.cloudfront.net","http://localhost:5174"]'
+    volumes:
+      - data:/data
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  orders-api:
+    build: ./orders-api
+    restart: unless-stopped
+    environment:
+      ORDERS_ORDERS_DATABASE_URL: sqlite:////data/orders.db
+      ORDERS_CART_DATABASE_URL: sqlite:////data/cart.db
+      ORDERS_ADMIN_DATABASE_URL: sqlite:////data/admin.db
+      ORDERS_CORS_ORIGINS: '["https://d3bwott4660u8l.cloudfront.net","https://dtjlzqdyq53fa.cloudfront.net","http://localhost:5174"]'
+    volumes:
+      - data:/data
+    depends_on:
+      cart-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  auth-api:
+    build: ./auth-api
+    restart: unless-stopped
+    environment:
+      AUTH_AUTH_DATABASE_URL: sqlite:////data/auth.db
+      AUTH_JWT_SECRET: ${AUTH_JWT_SECRET}
+      AUTH_CORS_ORIGINS: '["https://d3bwott4660u8l.cloudfront.net","https://dtjlzqdyq53fa.cloudfront.net","http://localhost:5174"]'
+    volumes:
+      - data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - admin-api
+      - catalog-api
+      - cart-api
+      - orders-api
+      - auth-api
+
+volumes:
+  data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /data
