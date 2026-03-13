@@ -45,6 +45,16 @@ class ComputeStack(cdk.Stack):
             "chmod +x /usr/local/lib/docker/cli-plugins/docker-compose",
             # Add ec2-user to docker group
             "usermod -aG docker ec2-user",
+            # Install newer docker buildx (AL2023 ships v0.12.1, compose needs v0.17+)
+            'mkdir -p /usr/local/lib/docker/cli-plugins',
+            'curl -sL "https://github.com/docker/buildx/releases/download/v0.19.3/buildx-v0.19.3.linux-amd64" -o /usr/local/lib/docker/cli-plugins/docker-buildx',
+            'chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx',
+            # Add 2GB swap to prevent OOM during Docker builds on t3.micro
+            "fallocate -l 2G /swapfile",
+            "chmod 600 /swapfile",
+            "mkswap /swapfile",
+            "swapon /swapfile",
+            "echo '/swapfile swap swap defaults 0 0' >> /etc/fstab",
             # Clone repo
             "git clone https://github.com/schamarthy/aws-ecommerce-aidlc.git /app",
             # Write .env file (values filled at deploy time via CDK tokens)
@@ -69,8 +79,10 @@ class ComputeStack(cdk.Stack):
             'echo "AUTH_JWT_SECRET=$(openssl rand -hex 32)" >> /app/.env',
             # Create data volume directory
             "mkdir -p /data",
-            # Start services (docker compose build + up)
-            "cd /app && docker compose -f docker-compose.prod.yml up --build -d || true",
+            # Build images sequentially (avoids OOM on 1GB t3.micro)
+            "cd /app && docker compose -f docker-compose.prod.yml build --no-parallel || true",
+            # Start all containers
+            "cd /app && docker compose -f docker-compose.prod.yml up -d || true",
         )
 
         # EC2 instance
