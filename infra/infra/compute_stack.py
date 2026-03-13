@@ -76,7 +76,7 @@ class ComputeStack(cdk.Stack):
         # EC2 instance
         self.instance = ec2.Instance(
             self, "EcommerceEc2",
-            instance_type=ec2.InstanceType("t2.micro"),
+            instance_type=ec2.InstanceType("t3.micro"),
             machine_image=ami,
             vpc=vpc,
             vpc_subnets=ec2.SubnetSelection(subnet_type=ec2.SubnetType.PUBLIC),
