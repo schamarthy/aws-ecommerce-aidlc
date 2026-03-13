@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { Order } from '../types/order'
 
-const api = axios.create({ baseURL: '/orders' })
+const api = axios.create({ baseURL: '/api/orders' })
 
 function getToken(): string {
   let token = localStorage.getItem('cart_session_token')

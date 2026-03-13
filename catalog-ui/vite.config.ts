@@ -6,10 +6,10 @@ export default defineConfig({
   server: {
     port: 5174,
     proxy: {
-      '/catalog': 'http://localhost:8001',
-      '/cart': 'http://localhost:8002',
-      '/orders': 'http://localhost:8003',
-      '/auth': 'http://localhost:8004',
+      '/api/catalog': { target: 'http://localhost:8001', rewrite: (p) => p.replace('/api/catalog', '/catalog') },
+      '/api/cart': { target: 'http://localhost:8002', rewrite: (p) => p.replace('/api/cart', '/cart') },
+      '/api/orders': { target: 'http://localhost:8003', rewrite: (p) => p.replace('/api/orders', '/orders') },
+      '/api/auth': { target: 'http://localhost:8004', rewrite: (p) => p.replace('/api/auth', '/auth') },
     },
   },
 })

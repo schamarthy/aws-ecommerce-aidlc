@@ -8,7 +8,7 @@ import type {
   ProductSummary,
 } from '../types'
 
-const api = axios.create({ baseURL: '/catalog' })
+const api = axios.create({ baseURL: '/api/catalog' })
 
 export const catalogApi = {
   categories: () => api.get<Category[]>('/categories').then(r => r.data),

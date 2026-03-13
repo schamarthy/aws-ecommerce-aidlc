@@ -8,7 +8,7 @@ from constructs import Construct
 
 
 class StorageStack(cdk.Stack):
-    def __init__(self, scope: Construct, construct_id: str, **kwargs):
+    def __init__(self, scope: Construct, construct_id: str, ec2_ip: str = "", **kwargs):
         super().__init__(scope, construct_id, **kwargs)
 
         account = self.account
@@ -58,6 +58,16 @@ class StorageStack(cdk.Stack):
         )
         self.uploads_cf_url = f"https://{uploads_dist.distribution_domain_name}"
 
+        # EC2 API origin (for /api/* behaviors) — only added when ec2_ip is provided
+        ec2_origin = origins.HttpOrigin(ec2_ip, protocol_policy=cf.OriginProtocolPolicy.HTTP_ONLY) if ec2_ip else None
+        api_behavior = cf.BehaviorOptions(
+            origin=ec2_origin,
+            viewer_protocol_policy=cf.ViewerProtocolPolicy.ALLOW_ALL,
+            cache_policy=cf.CachePolicy.CACHING_DISABLED,
+            allowed_methods=cf.AllowedMethods.ALLOW_ALL,
+            origin_request_policy=cf.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
+        ) if ec2_origin else None
+
         # catalog-ui distribution
         catalog_oac = cf.S3OriginAccessControl(self, "CatalogUiOac")
         catalog_dist = cf.Distribution(
@@ -70,6 +80,7 @@ class StorageStack(cdk.Stack):
                 viewer_protocol_policy=cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cache_policy=cf.CachePolicy.CACHING_OPTIMIZED,
             ),
+            additional_behaviors={"/api/*": api_behavior} if api_behavior else {},
             default_root_object="index.html",
             error_responses=[
                 cf.ErrorResponse(
@@ -97,6 +108,7 @@ class StorageStack(cdk.Stack):
                 viewer_protocol_policy=cf.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
                 cache_policy=cf.CachePolicy.CACHING_OPTIMIZED,
             ),
+            additional_behaviors={"/api/*": api_behavior} if api_behavior else {},
             default_root_object="index.html",
             error_responses=[
                 cf.ErrorResponse(

@@ -6,8 +6,7 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/admin': 'http://localhost:8000',
-      '/uploads': 'http://localhost:8000',
+      '/api/admin': { target: 'http://localhost:8000', rewrite: (p) => p.replace('/api/admin', '/admin') },
     },
   },
 })

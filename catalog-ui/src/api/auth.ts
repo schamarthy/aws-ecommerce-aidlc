@@ -1,7 +1,7 @@
 import axios from 'axios'
 import type { TokenResponse, User } from '../types/user'
 
-const api = axios.create({ baseURL: '/auth' })
+const api = axios.create({ baseURL: '/api/auth' })
 
 function getToken(): string | null {
   return localStorage.getItem('auth_token')
