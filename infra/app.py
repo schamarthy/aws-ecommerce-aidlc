@@ -10,7 +10,7 @@ env = cdk.Environment(account="074412166767", region="us-west-2")
 app = cdk.App()
 
 network = NetworkStack(app, "NetworkStack", env=env)
-storage = StorageStack(app, "StorageStack", ec2_ip="100.22.44.133", env=env)
+storage = StorageStack(app, "StorageStack", ec2_ip="ec2-100-22-44-133.us-west-2.compute.amazonaws.com", env=env)
 compute = ComputeStack(
     app, "ComputeStack",
     vpc=network.vpc,
