@@ -46,19 +46,25 @@ class ComputeStack(cdk.Stack):
             # Add ec2-user to docker group
             "usermod -aG docker ec2-user",
             # Clone repo
-            "git clone https://github.com/placeholder/ecommerce.git /app || true",
-            "mkdir -p /app",
+            "git clone https://github.com/schamarthy/aws-ecommerce-aidlc.git /app",
             # Write .env file (values filled at deploy time via CDK tokens)
             f'echo "S3_BUCKET_NAME={uploads_bucket.bucket_name}" > /app/.env',
             f'echo "S3_IMAGES_CLOUDFRONT_URL={uploads_cf_url}" >> /app/.env',
+            # admin-api (prefix: ADMIN_)
             'echo "ADMIN_DATABASE_URL=sqlite:////data/admin.db" >> /app/.env',
+            'echo "ADMIN_S3_BUCKET_NAME=' + uploads_bucket.bucket_name + '" >> /app/.env',
+            f'echo "ADMIN_S3_IMAGES_CLOUDFRONT_URL={uploads_cf_url}" >> /app/.env',
+            # catalog-api (prefix: CATALOG_)
             'echo "CATALOG_DATABASE_URL=sqlite:////data/admin.db" >> /app/.env',
-            'echo "CART_DATABASE_URL=sqlite:////data/cart.db" >> /app/.env',
+            # cart-api (prefix: CART_)
+            'echo "CART_CART_DATABASE_URL=sqlite:////data/cart.db" >> /app/.env',
             'echo "CART_CATALOG_DATABASE_URL=sqlite:////data/admin.db" >> /app/.env',
-            'echo "ORDERS_DATABASE_URL=sqlite:////data/orders.db" >> /app/.env',
+            # orders-api (prefix: ORDERS_)
+            'echo "ORDERS_ORDERS_DATABASE_URL=sqlite:////data/orders.db" >> /app/.env',
             'echo "ORDERS_CART_DATABASE_URL=sqlite:////data/cart.db" >> /app/.env',
             'echo "ORDERS_ADMIN_DATABASE_URL=sqlite:////data/admin.db" >> /app/.env',
-            'echo "AUTH_DATABASE_URL=sqlite:////data/auth.db" >> /app/.env',
+            # auth-api (prefix: AUTH_)
+            'echo "AUTH_AUTH_DATABASE_URL=sqlite:////data/auth.db" >> /app/.env',
             # JWT secret — generate a random one on first boot
             'echo "AUTH_JWT_SECRET=$(openssl rand -hex 32)" >> /app/.env',
             # Create data volume directory
