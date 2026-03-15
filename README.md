@@ -14,8 +14,6 @@ A full-stack eCommerce application built as an AI-assisted learning project. The
 
 ![AWS eCommerce Platform — Design Overview](docs/design-overview.png)
 
-![AWS eCommerce Platform — Architecture Detail](docs/architecture-overview.png)
-
 ---
 
 ## Table of Contents
