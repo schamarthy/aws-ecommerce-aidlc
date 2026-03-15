@@ -5,8 +5,8 @@ A full-stack eCommerce application built as an AI-assisted learning project. The
 **Live URLs**
 | App | URL |
 |---|---|
-| Customer Store | https://d3bwott4660u8l.cloudfront.net |
-| Admin Dashboard | https://dtjlzqdyq53fa.cloudfront.net |
+| Customer Store | https://<FQDN>.cloudfront.net |
+| Admin Dashboard | https://FQDN.cloudfront.net |
 
 ---
 
@@ -60,11 +60,11 @@ Browser
   │       ├── /* ─────────────────► S3: ecommerce-catalog-ui  (React SPA)
   │       └── /api/* ─────────────► EC2 t3.micro (nginx → API containers)
   │
-  ├─ https://dtjlzqdyq53fa.cloudfront.net   (Admin UI)
+  ├─ https://FQDN.cloudfront.net   (Admin UI)
   │       ├── /* ─────────────────► S3: ecommerce-admin-ui   (React SPA)
   │       └── /api/* ─────────────► EC2 t3.micro (nginx → API containers)
   │
-  └─ https://d2uwk625use1bh.cloudfront.net  (Product Images CDN)
+  └─ https://FQDN.cloudfront.net  (Product Images CDN)
           └── /uploads/* ─────────► S3: ecommerce-uploads    (private, OAC)
 
 
@@ -317,11 +317,11 @@ S3 Buckets (all block public access)
 └── ecommerce-admin-ui-{account}     — admin SPA, auto-delete on destroy
 
 CloudFront Distributions (all use OAC)
-├── d2uwk625use1bh.cloudfront.net    — uploads bucket, HTTPS redirect, cache optimized
-├── d3bwott4660u8l.cloudfront.net    — catalog UI
+├── FQDN.cloudfront.net    — uploads bucket, HTTPS redirect, cache optimized
+├── FQDN.cloudfront.net    — catalog UI
 │     ├── /* → catalog-ui S3 (cache optimized, index.html fallback)
 │     └── /api/* → EC2 (cache disabled, all methods, no Host header forwarding)
-└── dtjlzqdyq53fa.cloudfront.net     — admin UI
+└── FQDN.cloudfront.net     — admin UI
       ├── /* → admin-ui S3 (cache optimized, index.html fallback)
       └── /api/* → EC2 (cache disabled, all methods, no Host header forwarding)
 ```
